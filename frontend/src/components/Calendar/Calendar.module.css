@@ -3,35 +3,36 @@
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: var(--spacing-md);
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-md);
 }
 
 .monthTitle {
-  font-size: 1.25rem;
+  font-size: var(--font-size-lg);
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .navButton {
   background: none;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   padding: 0.5rem 1rem;
   cursor: pointer;
-  font-size: 1rem;
-  color: #555;
-  transition: background-color 0.2s ease;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  transition: background-color var(--transition-normal), border-color var(--transition-normal);
 }
 
 .navButton:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-neutral-bg);
+  border-color: var(--color-text-muted);
 }
 
 .weekdays {
@@ -45,12 +46,69 @@
   text-align: center;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #888;
-  padding: 0.25rem 0;
+  color: var(--color-text-muted);
+  padding: var(--spacing-xs) 0;
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 2px;
+}
+
+/* Touch support */
+.navButton {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.navButton:active {
+  background-color: var(--color-border);
+}
+
+/* Tablet: max-width 768px */
+@media (max-width: 768px) {
+  .calendar {
+    padding: 0.75rem;
+  }
+
+  .monthTitle {
+    font-size: 1.1rem;
+  }
+
+  .navButton {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* Mobile: max-width 480px */
+@media (max-width: 480px) {
+  .calendar {
+    padding: 0.5rem;
+  }
+
+  .header {
+    margin-bottom: 0.5rem;
+  }
+
+  .monthTitle {
+    font-size: 1rem;
+  }
+
+  .navButton {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .weekday {
+    font-size: 0.65rem;
+  }
+
+  .grid {
+    gap: 1px;
+  }
 }

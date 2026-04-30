@@ -1,15 +1,15 @@
 .app {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--spacing-xl);
   text-align: center;
 }
 
 h1 {
-  color: #333;
-  margin-bottom: 1rem;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
 }
 
 p {
-  color: #666;
+  color: var(--color-text-secondary);
 }
