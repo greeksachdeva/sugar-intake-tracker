@@ -1101,3 +1101,215 @@ The power provides an interactive onboarding flow that generates:
 Continue the Kiro Ignition onboarding flow from Step 2 (role discovery) to generate personalized steering files, hooks, and MCP configurations. After onboarding is complete, proceed with the Sugar Intake Tracker project — Task 6 (Backend checkpoint) is the next development task.
 
 ---
+
+## Session 11: Frontend Foundation and Backend Checkpoint (Tasks 6–8.3)
+**Date:** April 30, 2026  
+**Task:** Tasks 6 through 8.4 (partial) — Backend checkpoint, frontend structure, API client, Calendar, DayCell, and property tests
+
+### What Was Accomplished
+Executed the "run all tasks" workflow for the remaining spec tasks. Completed the backend checkpoint (Task 6), verifying all 74 backend tests pass with 82.5% statement coverage. Built the frontend foundation: component directory structure with CSS modules and design tokens (Task 7.1), API client service with structured error handling (Task 7.2), API client unit tests (Task 7.3), Calendar component with month grid and navigation (Task 8.1), DayCell component with emoji visual feedback (Task 8.2), property test for calendar day count (Task 8.3), and property test for visual feedback (Task 8.4 — completed by subagent but parent task interrupted by a connection error). All work was committed to git on the `main` branch.
+
+### Code Changes Made
+
+#### Task 6: Backend Checkpoint
+- **No code changes** — Ran the full backend test suite to verify all 74 tests pass across 10 test suites with 82.5% statement coverage, 90.38% branch coverage, and 81.81% function coverage.
+
+#### Task 7.1: Frontend Component Directory Structure
+- **Created:** `frontend/src/styles/variables.css` — CSS custom properties (design tokens) for colors, spacing, border radii, shadows, transitions, and typography
+- **Created:** `frontend/src/styles/App.module.css` — Root App component layout styles (header, main, loading, error, retry button)
+- **Created:** `frontend/src/components/Calendar/Calendar.module.css` — Calendar grid, header, navigation buttons, weekday headers
+- **Created:** `frontend/src/components/DayCell/DayCell.module.css` — Day cell with entry status styles (noEntry, noSugar, sugarConsumed, today, otherMonth)
+- **Created:** `frontend/src/components/DailyPrompt/DailyPrompt.module.css` — Prompt card with yes/no buttons and confirmation message
+- **Created:** `frontend/src/components/UpdateDialog/UpdateDialog.module.css` — Modal overlay and dialog with action buttons
+- **Created:** `frontend/src/components/ImageDisplay/ImageDisplay.module.css` — Image display with loading/error states
+- **Modified:** `frontend/src/styles/index.css` — Added `@import './variables.css'` to load design tokens globally
+
+#### Task 7.2: API Client Service
+- **Created:** `frontend/src/services/apiClient.js`
+  - `ApiError` custom error class carrying HTTP status code and backend error details
+  - `ApiClient` class with `_request()` internal helper for fetch + error handling
+  - Methods: `getEntries(startDate, endDate)`, `createEntry(date, sugarConsumed)`, `updateEntry(date, sugarConsumed)`, `getImages()`, `healthCheck()`
+  - Base URL from `VITE_API_URL` env var with fallback to `http://localhost:3001`
+  - Network failure handling, non-OK response parsing, invalid JSON detection
+  - Singleton export as default, named exports for `ApiClient` and `ApiError`
+
+#### Task 7.3: API Client Unit Tests
+- **Created:** `frontend/src/services/apiClient.test.js` — 9 tests:
+  - `getEntries` — correct URL with query params and response
+  - `createEntry` — POST method, correct body, response
+  - `updateEntry` — PUT to `/api/entries/:date`, correct body
+  - `getImages` — GET to `/api/images`, response
+  - `healthCheck` — GET to `/api/health`, response
+  - Network error → `ApiError` with null status
+  - Non-OK 400 response → `ApiError` with message and details from body
+  - Non-OK 500 response (no error body) → `ApiError` with generic status message
+  - Invalid JSON response → `ApiError` with "Invalid response from server"
+
+#### Task 8.1: Calendar Component
+- **Created:** `frontend/src/utils/calendarUtils.js` — Utility functions:
+  - `getDaysInMonth(year, month)` — correct day count including leap years
+  - `getCalendarGridDays(year, month)` — full Sun–Sat grid with leading/trailing days
+  - `formatDateKey(date)` — Date → YYYY-MM-DD string
+  - `isSameDay(a, b)` — compare two dates by calendar day
+  - `getMonthYearLabel(date)` — "Month Year" display string
+- **Created:** `frontend/src/utils/calendarUtils.test.js` — 16 unit tests for all utility functions
+- **Created:** `frontend/src/components/Calendar/Calendar.jsx` — Calendar component with:
+  - Month/year title, prev/next navigation buttons with aria-labels
+  - Weekday headers (Sun–Sat), full month grid
+  - Entry lookup via indexed map for O(1) access
+  - Keyboard accessibility (Enter/Space to click days)
+- **Created:** `frontend/src/components/Calendar/Calendar.test.jsx` — 9 unit tests for rendering, navigation, day clicks, leap years
+
+#### Task 8.2: DayCell Component
+- **Created:** `frontend/src/components/DayCell/DayCell.jsx` — DayCell component with:
+  - Visual states: neutral (no entry), green + 😊 (no sugar), red tint + 😔 (sugar consumed)
+  - Click handler for current-month days only
+  - Keyboard support (Enter/Space), proper aria-labels with entry status
+  - CSS module classes from DayCell.module.css
+- **Created:** `frontend/src/components/DayCell/DayCell.test.jsx` — 12 unit tests for rendering, emojis, clicks, keyboard, accessibility
+- **Modified:** `frontend/src/components/Calendar/Calendar.jsx` — Replaced inline `renderDay` function with `DayCell` component import
+
+#### Task 8.3: Property Test for Calendar Day Count
+- **Created:** `frontend/src/utils/calendarUtils.property.test.js` — 2 property-based tests (Property 4):
+  - General month day count — 100 iterations across random year/month
+  - Leap year February handling — 100 iterations verifying 29 vs 28 days
+
+#### Task 8.4: Property Test for Visual Feedback (partially completed)
+- **Created:** `frontend/src/components/DayCell/DayCell.property.test.jsx` — 4 property-based tests (Property 5):
+  - Tests were created and pass (verified manually), but the parent task status was not updated due to a subagent connection error
+
+### Files Modified/Created/Deleted
+
+#### Created Files (20 new files):
+| File | Lines | Purpose |
+|---|---|---|
+| `frontend/src/styles/variables.css` | ~43 | CSS design tokens |
+| `frontend/src/styles/App.module.css` | ~62 | App component styles |
+| `frontend/src/components/Calendar/Calendar.module.css` | ~56 | Calendar grid styles |
+| `frontend/src/components/Calendar/Calendar.jsx` | ~117 | Calendar component |
+| `frontend/src/components/Calendar/Calendar.test.jsx` | ~89 | Calendar unit tests |
+| `frontend/src/components/DayCell/DayCell.module.css` | ~59 | DayCell styles |
+| `frontend/src/components/DayCell/DayCell.jsx` | ~91 | DayCell component |
+| `frontend/src/components/DayCell/DayCell.test.jsx` | ~103 | DayCell unit tests |
+| `frontend/src/components/DayCell/DayCell.property.test.jsx` | ~137 | DayCell property tests (Property 5) |
+| `frontend/src/components/DailyPrompt/DailyPrompt.module.css` | ~65 | DailyPrompt styles |
+| `frontend/src/components/UpdateDialog/UpdateDialog.module.css` | ~100 | UpdateDialog styles |
+| `frontend/src/components/ImageDisplay/ImageDisplay.module.css` | ~36 | ImageDisplay styles |
+| `frontend/src/services/apiClient.js` | ~151 | API client service |
+| `frontend/src/services/apiClient.test.js` | ~195 | API client unit tests |
+| `frontend/src/utils/calendarUtils.js` | ~84 | Calendar utility functions |
+| `frontend/src/utils/calendarUtils.test.js` | ~102 | Calendar utils unit tests |
+| `frontend/src/utils/calendarUtils.property.test.js` | ~56 | Calendar day count property tests (Property 4) |
+
+#### Modified Files:
+| File | Change |
+|---|---|
+| `frontend/src/styles/index.css` | Added `@import './variables.css'` |
+| `frontend/src/components/Calendar/Calendar.jsx` | Replaced inline renderDay with DayCell component |
+| `.kiro/specs/sugar-intake-tracker/tasks.md` | Updated task statuses for tasks 6, 7.1–7.3, 8.1–8.3 to completed; queued remaining tasks |
+
+#### No Files Deleted
+
+### Terminal Commands Executed
+
+```bash
+# Backend test suite (Task 6 checkpoint)
+npm test -- --forceExit
+# Purpose: Verify all 74 backend tests pass before moving to frontend
+# Working directory: backend/
+# Result: 10 test suites, 74 tests passed, 82.5% statement coverage
+
+# Frontend build verification (Task 7.1)
+npm run build
+# Purpose: Verify Vite build succeeds after adding CSS modules and design tokens
+# Working directory: frontend/
+# Result: Build successful, 0 diagnostics
+
+# Frontend test run (Task 7.3)
+npx vitest run
+# Purpose: Verify API client tests pass
+# Working directory: frontend/
+# Result: 9 tests passed
+
+# Frontend test run (Task 8.1)
+npx vitest run
+# Purpose: Verify Calendar component and utility tests pass
+# Working directory: frontend/
+# Result: 34 tests passed (9 API + 16 utils + 9 Calendar)
+
+# Frontend test run (Task 8.2)
+npx vitest run
+# Purpose: Verify DayCell component tests pass alongside existing tests
+# Working directory: frontend/
+# Result: 46 tests passed (9 API + 16 utils + 9 Calendar + 12 DayCell)
+
+# Frontend property test run (Task 8.3)
+npx vitest run src/utils/calendarUtils.property.test.js
+# Purpose: Verify Property 4 (calendar day count) passes with 100 iterations
+# Working directory: frontend/
+# Result: 2 property tests passed
+
+# DayCell property test verification (Task 8.4)
+npx vitest run src/components/DayCell/DayCell.property.test.jsx
+# Purpose: Verify Property 5 (visual feedback) passes with 100 iterations
+# Working directory: frontend/
+# Result: 4 property tests passed
+
+# Git commit
+git add backend/ frontend/src/ frontend/package.json frontend/vite.config.js ...
+git commit -m "feat: Implement backend API and frontend foundation (tasks 1-8.3)"
+# Purpose: Save all progress to version control
+# Result: 57 files changed, 5133 insertions(+), 63 deletions(-), commit 91a3875
+```
+
+### Test Results Summary
+
+#### Backend (unchanged from Session 9):
+| Test Suite | Tests | Status |
+|---|---|---|
+| All 10 suites | 74 | ✓ All passed |
+
+#### Frontend (new):
+| Test Suite | Tests | Status |
+|---|---|---|
+| `services/apiClient.test.js` | 9 | ✓ All passed |
+| `utils/calendarUtils.test.js` | 16 | ✓ All passed |
+| `utils/calendarUtils.property.test.js` | 2 | ✓ All passed |
+| `components/Calendar/Calendar.test.jsx` | 9 | ✓ All passed |
+| `components/DayCell/DayCell.test.jsx` | 12 | ✓ All passed |
+| `components/DayCell/DayCell.property.test.jsx` | 4 | ✓ All passed |
+| **Frontend Total** | **52** | **✓ All passed** |
+
+### Property Tests Status
+
+| Property | File | Tests | Iterations | Status |
+|---|---|---|---|---|
+| Property 4: Calendar Displays Correct Day Count | `calendarUtils.property.test.js` | 2 | 100 each | ✓ Passed |
+| Property 5: Visual Feedback Matches Entry Status | `DayCell.property.test.jsx` | 4 | 100 each | ✓ Passed |
+
+### Git Activity
+- **Commit:** `91a3875` on `main` branch
+- **Message:** `feat: Implement backend API and frontend foundation (tasks 1-8.3)`
+- **Files:** 57 files changed, 5133 insertions, 63 deletions
+- **Not pushed** — commit is local only per git safety rules
+
+### Tasks Completed This Session
+| Task | Description | Status |
+|---|---|---|
+| 6 | Checkpoint — Backend complete | ✓ Completed |
+| 7.1 | Create component directory structure | ✓ Completed |
+| 7.2 | Create API client service | ✓ Completed |
+| 7.3 | Write unit tests for API client | ✓ Completed |
+| 8.1 | Create Calendar component with month grid | ✓ Completed |
+| 8.2 | Create DayCell component | ✓ Completed |
+| 8.3 | Write property test for calendar day count | ✓ Completed |
+| 8.4 | Write property test for visual feedback | ⚠ Code complete, task status not updated (subagent error) |
+
+### Next Steps
+Resume task execution from Task 8.4 (mark as complete) then continue with:
+- Task 8.5: Property test for day click behavior (Property 7)
+- Task 8.6: Unit tests for calendar edge cases
+- Task 9: DailyPrompt component
+- Tasks 10–19: Remaining frontend components, integration, responsive design, deployment docs
+
+---
