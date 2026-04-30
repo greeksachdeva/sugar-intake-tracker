@@ -1637,3 +1637,201 @@ The project is feature-complete. Remaining actions:
 - Update README with actual deployment URLs
 
 ---
+
+## Session 14: Git Push — Frontend and Documentation
+**Date:** April 30, 2026  
+**Task:** Push remaining local commits to GitHub remote
+
+### What Was Accomplished
+Committed the Session 13 development log entry and pushed two local commits to `origin/main`, bringing the remote repository fully up to date with the complete project implementation.
+
+### Code Changes Made
+- **None** — No application code was added, modified, or removed. This session was a commit + push operation for the summary log.
+
+### Files Modified/Created/Deleted
+
+#### Modified Files:
+- `.kiro/specs/sugar-intake-tracker/summary.md` — Added Session 13 entry (280 lines), then committed
+
+#### No Files Created or Deleted
+
+### Terminal Commands Executed
+
+```bash
+# Stage summary update
+git add .kiro/specs/sugar-intake-tracker/summary.md
+# Purpose: Stage the Session 13 development log entry
+
+# Commit summary update
+git commit -m "docs: Add Session 13 development log entry"
+# Result: 1 file changed, 280 insertions, commit 59d64db
+
+# Push both pending commits to remote
+git push
+# Purpose: Push commits 01c811b (feat) and 59d64db (docs) to origin/main
+# Result: 53 objects pushed (46.50 KiB) to https://github.com/greeksachdeva/sugar-intake-tracker.git
+#   27b5883..59d64db  main -> main
+```
+
+### Commits Pushed
+1. **`01c811b`** — `feat: Complete frontend implementation and deployment docs (tasks 8.4-19)` — 31 files changed, 3844 insertions, 152 deletions
+2. **`59d64db`** — `docs: Add Session 13 development log entry` — 1 file changed, 280 insertions
+
+### Git State After Push
+| Ref | Commit | Description |
+|---|---|---|
+| `origin/main` | `59d64db` | docs: Add Session 13 development log entry |
+| `HEAD -> main` | `59d64db` | (same — local and remote are in sync) |
+
+### Next Steps
+Project is feature-complete and fully pushed. Remaining actions:
+- Deploy backend to Render
+- Deploy frontend to Vercel
+- Update README with actual deployment URLs
+
+---
+
+## Session 15: Configure MongoDB Atlas Connection for Local Development
+**Date:** April 30, 2026  
+**Task:** Fix backend MongoDB connection for local development
+
+### What Was Accomplished
+Updated the backend `.env` file to use the MongoDB Atlas connection string instead of a local MongoDB instance. The previous default (`mongodb://localhost:27017/sugar-tracker`) was failing with `ECONNREFUSED` because no local MongoDB server was running. Replaced it with the user's Atlas cluster connection string so the backend can connect to the cloud database.
+
+### Code Changes Made
+- **Modified:** `backend/.env`
+  - Changed `MONGODB_URI` from `mongodb://localhost:27017/sugar-tracker` to the user's MongoDB Atlas SRV connection string pointing at `cluster0.zphwwtp.mongodb.net/sugar-tracker`
+  - All other environment variables unchanged (PORT=5000, NODE_ENV=development, FRONTEND_URL=http://localhost:3000)
+
+### Files Modified/Created/Deleted
+
+#### Modified Files:
+- `backend/.env` — Updated `MONGODB_URI` to Atlas connection string
+
+#### No Files Created or Deleted
+
+> **Note:** `backend/.env` is listed in `.gitignore` and will not be committed to version control. Credentials are not stored in the repository.
+
+### Terminal Commands Executed
+- **None executed by Kiro** — The `.env` file was updated using the file editing tool. The user was instructed to restart the backend manually with `npm run dev` in their terminal.
+
+### Next Steps
+- Restart the backend (`cd backend && npm run dev`) to connect to Atlas
+- Start the frontend (`cd frontend && npm run dev`) to view the app at http://localhost:3000
+- Verify the full app works end-to-end in the browser
+
+---
+
+## Session 16: Local Development Environment Setup and Troubleshooting
+**Date:** April 30, 2026  
+**Task:** Configure and launch the application locally for the first time
+
+### What Was Accomplished
+Configured the backend and frontend `.env` files for local development with MongoDB Atlas. Resolved three issues encountered during startup: MongoDB Atlas IP whitelist (user fixed in Atlas dashboard), authentication failure (user reset password in Atlas), and port 5000 conflict from zombie processes. Changed the backend port to 5001 to work around the persistent port conflict, and created the frontend `.env` pointing to the new port.
+
+### Code Changes Made
+
+#### Backend Environment Configuration
+- **Modified:** `backend/.env`
+  - Changed `MONGODB_URI` from `mongodb://localhost:27017/sugar-tracker` to the user's MongoDB Atlas SRV connection string (`cluster0.zphwwtp.mongodb.net/sugar-tracker`)
+  - Changed `PORT` from `5000` to `5001` to avoid persistent `EADDRINUSE` conflict
+
+#### Frontend Environment Configuration
+- **Created:** `frontend/.env`
+  - Set `VITE_API_URL=http://localhost:5001/api` to match the updated backend port
+
+### Files Modified/Created/Deleted
+
+#### Created Files:
+- `frontend/.env` — Frontend environment config pointing to backend at port 5001
+
+#### Modified Files:
+- `backend/.env` — Updated MONGODB_URI to Atlas and PORT to 5001
+
+#### No Files Deleted
+
+> **Note:** Both `.env` files are in `.gitignore` and will not be committed to version control.
+
+### Terminal Commands Executed
+
+```bash
+# Kill stale process on port 5000
+lsof -ti:5000 | xargs kill -9 2>/dev/null; echo "done"
+# Purpose: Free port 5000 from a zombie node process left by previous failed startups
+# Result: Process killed, but port remained occupied on subsequent attempts — switched to port 5001 instead
+```
+
+### Issues Encountered and Resolved
+
+| Issue | Error | Resolution |
+|---|---|---|
+| No local MongoDB | `connect ECONNREFUSED 127.0.0.1:27017` | Updated `MONGODB_URI` in `.env` to Atlas connection string |
+| Atlas IP not whitelisted | `Could not connect to any servers in your MongoDB Atlas cluster` | User added `0.0.0.0/0` in Atlas Network Access |
+| Wrong password | `bad auth: authentication failed` | User reset database user password in Atlas Database Access |
+| Port 5000 in use | `EADDRINUSE: address already in use :::5000` | Changed `PORT` to `5001` in `.env` and created `frontend/.env` with matching URL |
+
+### Next Steps
+- Start backend: `cd backend && npm run dev` (should connect to Atlas on port 5001)
+- Start frontend: `cd frontend && npm run dev` (opens at http://localhost:3000)
+- Verify the full app works in the browser at http://localhost:3000
+
+---
+
+## Session 17: Fix API URL, Update Docs, and Final Push
+**Date:** April 30, 2026  
+**Task:** Fix double `/api` path issue, update environment examples and README, final push
+
+### What Was Accomplished
+Fixed a double `/api` path bug where the frontend was requesting `/api/api/entries` instead of `/api/entries`. The root cause was `VITE_API_URL` including `/api` while the API client also prepended `/api` to all paths. Removed `/api` from the env var. Updated both `.env.example` files to reflect the correct port (5001) and URL format. Rewrote the README's local development and deployment sections with accurate, tested instructions including the correct GitHub repo URL and a clear warning about the `/api` suffix.
+
+### Code Changes Made
+
+- **Modified:** `frontend/.env` — Changed `VITE_API_URL` from `http://localhost:5001/api` to `http://localhost:5001` (fixes double `/api` in requests)
+- **Modified:** `backend/.env.example` — Changed `PORT` from `5000` to `5001`
+- **Modified:** `frontend/.env.example` — Changed `VITE_API_URL` from `http://localhost:5000/api` to `http://localhost:5001`
+- **Modified:** `README.md` — Rewrote Quick Start and Deployment sections:
+  - Added MongoDB Atlas setup as an explicit step
+  - Updated all port references from 5000 to 5001
+  - Added warning about not including `/api` in `VITE_API_URL`
+  - Updated clone URL to actual GitHub repo
+  - Replaced deployment section with concise 4-step guide (Atlas → Render → Vercel → CORS update)
+
+### Files Modified/Created/Deleted
+
+#### Modified Files:
+| File | Change |
+|---|---|
+| `frontend/.env` | Removed `/api` suffix from `VITE_API_URL` |
+| `backend/.env.example` | Port 5000 → 5001 |
+| `frontend/.env.example` | Port 5000 → 5001, removed `/api` suffix |
+| `README.md` | Rewrote local dev setup and deployment guide |
+| `.kiro/specs/sugar-intake-tracker/summary.md` | Added Sessions 15, 16, and 17 |
+
+#### No Files Created or Deleted
+
+### Terminal Commands Executed
+
+```bash
+# Kill stale process on port 5000
+lsof -ti:5000 | xargs kill -9 2>/dev/null; echo "done"
+# Purpose: Free port 5000 from zombie node processes
+# Result: Port freed but kept getting re-occupied; switched to port 5001
+
+# Stage and commit all changes
+git add ...
+git commit -m "fix: Correct API URL and update local dev docs"
+git push
+# Purpose: Push all fixes and documentation updates to GitHub
+```
+
+### Bug Fixed
+**Double `/api` path in requests:**
+- Symptom: Backend logs showed `GET /api/api/entries 404` — all requests returning 404
+- Root cause: `VITE_API_URL=http://localhost:5001/api` + API client prepending `/api` to paths = `/api/api/entries`
+- Fix: Set `VITE_API_URL=http://localhost:5001` (no `/api` suffix)
+
+### Next Steps
+- App is running locally and verified working
+- Ready for Vercel/Render deployment using the updated README guide
+
+---

@@ -37,11 +37,23 @@ A web application that helps you monitor your daily sugar consumption through a 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/sugar-intake-tracker.git
+git clone https://github.com/greeksachdeva/sugar-intake-tracker.git
 cd sugar-intake-tracker
 ```
 
-### 2. Set Up the Backend
+### 2. Set Up MongoDB Atlas (Free)
+
+You need a MongoDB database. The easiest option is MongoDB Atlas (free tier):
+
+1. Go to [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas) and create a free account
+2. Create a free cluster (M0)
+3. Create a database user with a password
+4. Go to **Network Access** → **Add IP Address** → **Allow Access from Anywhere**
+5. Click **Connect** → **Drivers** → copy the connection string
+
+For detailed steps, see the [MongoDB Atlas setup guide](docs/mongodb-atlas-setup.md).
+
+### 3. Set Up the Backend
 
 ```bash
 cd backend
@@ -49,16 +61,14 @@ npm install
 cp .env.example .env
 ```
 
-Edit `backend/.env` and set your MongoDB connection string:
+Edit `backend/.env` and set your MongoDB Atlas connection string:
 
 ```
-MONGODB_URI=mongodb://localhost:27017/sugar-tracker
-PORT=5000
+MONGODB_URI=mongodb+srv://YOUR_USER:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/sugar-tracker?retryWrites=true&w=majority&appName=Cluster0
+PORT=5001
 NODE_ENV=development
 FRONTEND_URL=http://localhost:3000
 ```
-
-> If using MongoDB Atlas, replace the `MONGODB_URI` with your Atlas connection string. See the [MongoDB Atlas setup guide](docs/mongodb-atlas-setup.md) for details.
 
 Start the backend:
 
@@ -66,15 +76,17 @@ Start the backend:
 npm run dev
 ```
 
-The backend runs at [http://localhost:5000](http://localhost:5000). Verify it's working:
+The backend runs at [http://localhost:5001](http://localhost:5001). Verify it's working:
 
 ```bash
-curl http://localhost:5000/api/health
+curl http://localhost:5001/api/health
 ```
 
-### 3. Set Up the Frontend
+You should see: `{"status":"ok","timestamp":"..."}`
 
-Open a new terminal:
+### 4. Set Up the Frontend
+
+Open a **second terminal**:
 
 ```bash
 cd frontend
@@ -82,11 +94,13 @@ npm install
 cp .env.example .env
 ```
 
-The default `frontend/.env` should already point to the local backend:
+The default `frontend/.env` points to the local backend:
 
 ```
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5001
 ```
+
+> **Important:** Do NOT include `/api` at the end — the API client adds it automatically.
 
 Start the frontend:
 
@@ -96,7 +110,7 @@ npm run dev
 
 The app opens at [http://localhost:3000](http://localhost:3000).
 
-### 4. Seed Sample Images (Optional)
+### 5. Seed Sample Images (Optional)
 
 To populate the database with sample background images:
 
@@ -123,13 +137,48 @@ npm test
 
 ## Deployment
 
-The app is designed to run entirely on free-tier hosting services. Follow these guides in order:
+The app runs entirely on free-tier hosting. You need three services:
 
-1. **[MongoDB Atlas Setup](docs/mongodb-atlas-setup.md)** — Create a free cloud database
-2. **[Backend Deployment (Render)](docs/backend-deployment-render.md)** — Deploy the API server
-3. **[Frontend Deployment (Vercel)](docs/frontend-deployment-vercel.md)** — Deploy the web interface
+### Step 1: MongoDB Atlas (Database)
 
-Having issues? Check the **[Troubleshooting Guide](docs/troubleshooting.md)**.
+Already done if you followed the local setup. Your Atlas cluster works for both local and production.
+
+### Step 2: Deploy Backend to Render
+
+1. Go to [render.com](https://render.com) → sign up with GitHub
+2. Click **New** → **Web Service** → connect your GitHub repo
+3. Configure:
+   - **Root Directory:** `backend`
+   - **Build Command:** `npm install`
+   - **Start Command:** `npm start`
+   - **Instance Type:** Free
+4. Add environment variables:
+   - `MONGODB_URI` = your Atlas connection string
+   - `NODE_ENV` = `production`
+   - `FRONTEND_URL` = (set after deploying frontend)
+5. Click **Create Web Service** — note the URL (e.g., `https://sugar-tracker-api.onrender.com`)
+
+### Step 3: Deploy Frontend to Vercel
+
+1. Go to [vercel.com](https://vercel.com) → sign up with GitHub
+2. Click **Add New** → **Project** → import your repo
+3. Configure:
+   - **Root Directory:** `frontend`
+   - **Framework Preset:** Vite
+4. Add environment variable:
+   - `VITE_API_URL` = your Render backend URL (e.g., `https://sugar-tracker-api.onrender.com`)
+   - **Do NOT** include `/api` at the end
+5. Click **Deploy** — note the URL (e.g., `https://sugar-tracker.vercel.app`)
+
+### Step 4: Update Backend CORS
+
+Go back to Render → your backend service → **Environment** → set `FRONTEND_URL` to your Vercel URL (e.g., `https://sugar-tracker.vercel.app`). Render will auto-redeploy.
+
+For detailed step-by-step guides with troubleshooting:
+- [MongoDB Atlas Setup](docs/mongodb-atlas-setup.md)
+- [Backend Deployment (Render)](docs/backend-deployment-render.md)
+- [Frontend Deployment (Vercel)](docs/frontend-deployment-vercel.md)
+- [Troubleshooting Guide](docs/troubleshooting.md)
 
 ## Deployed Application
 
